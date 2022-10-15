@@ -3,6 +3,7 @@ import { DiagnosticSeverity, Range } from 'vscode-languageserver-types';
 import child_process from 'child_process';
 import { Keyword } from 'dockerfile-ast';
 import xml2js from 'xml2js';
+import path = require('path');
 
 export function runServiceDiscovery(this: DynamicAnalysis) {
 	const rangesInFile: Range[] = [];
@@ -21,7 +22,7 @@ export function runServiceDiscovery(this: DynamicAnalysis) {
 						protocols.push("tcp"); //Ranged ports are always tcp
 					}
 				} else {
-					const splitPortProtocol = arg.getValue().split("/");
+					const splitPortProtocol = arg.getValue().split(path.sep);
 					rangesInFile.push(arg.getRange());
 					ports.push(parseInt(splitPortProtocol[0]));
 					protocols.push(splitPortProtocol[1] ? splitPortProtocol[1] : "tcp"); //Default protocol is tcp
@@ -52,7 +53,7 @@ export function runServiceDiscovery(this: DynamicAnalysis) {
 
 		const mappings = data.NetworkSettings.Ports;
 		for (let i = 0; i < rangesInFile.length; i++) {
-			let portMapping = mappings[ports[i] + "/" + protocols[i]];
+			let portMapping = mappings[ports[i] + path.sep + protocols[i]];
 			if(portMapping && portMapping[0] && portMapping[0].HostPort){
 				mappedPorts.push(parseInt(portMapping[0].HostPort));
 			}
@@ -132,7 +133,7 @@ export function runNmap(this: DynamicAnalysis, tcpMappedPorts, mappedPorts, rang
 					} else {
 						let msg = `Port ${ports[index]} (exposed on ${portID}) - ${protocol}`;
 						if (serviceName) {
-							msg += "/" + serviceName;
+							msg += path.sep + serviceName;
 						}
 						if (serviceProduct) {
 							msg += " - " + serviceProduct;

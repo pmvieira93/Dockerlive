@@ -1,6 +1,7 @@
 import { DynamicAnalysis } from './dynamicAnalysis';
 import tar_stream from 'tar-stream';
 import internal = require('stream');
+import path = require('path');
 
 interface PreliminaryFilesystemEntry{
 	path: string,
@@ -82,7 +83,7 @@ function mergeLayers(a : FilesystemEntryCollection, b: PreliminaryFilesystemEntr
 		mergedCollection = {};
 
 	for(let entry of b){
-		let splitPath = entry.path.split("/").filter((value,_index,_array) => value != null && value.length > 0);
+		let splitPath = entry.path.split(path.sep).filter((value,_index,_array) => value != null && value.length > 0);
 		let currentMergedCollection = mergedCollection;
 		let currentChangesCollection = changesCollection;
 
@@ -219,7 +220,7 @@ export function getFilesystem(this: DynamicAnalysis, imageID: string){
 				}, () => {
 					//Ordering ensures that filesystem structure is created in a structurally safe order (e.g. not create file /etc/os_release before creating folder /etc)
 					preliminaryFilesystemEntries.sort((a: PreliminaryFilesystemEntry, b: PreliminaryFilesystemEntry) => { 
-						return a.path.split("/").length - b.path.split("/").length;
+						return a.path.split(path.sep).length - b.path.split(path.sep).length;
 					});
 
 					preliminaryLayers[layerName] = preliminaryFilesystemEntries;

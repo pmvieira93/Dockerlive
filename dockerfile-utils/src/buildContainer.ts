@@ -17,7 +17,9 @@ export function buildContainer(this: DynamicAnalysis) {
 	const tmpFileName = "tmp.Dockerfile"; //TODO - ADD TEMPORARY FILE TO VSCODE and GIT IGNORE (or simply move to a different directory)
 
 	const tardir = tar.pack(directory);
-	fs.writeFileSync(directory + "/" + tmpFileName, this.document.getText());
+	// MacOS & Unix/Linux = '/'
+	// Windows = '\\'
+	fs.writeFileSync(directory + path.sep + tmpFileName, this.document.getText());
 
 	this.docker.buildImage(tardir, { t: "testimage", dockerfile: tmpFileName, openStdin: true }, (error: string, stream: Duplex) => {
 		this.buildStream = stream;
@@ -58,7 +60,7 @@ export function buildContainer(this: DynamicAnalysis) {
 
 						if (parsedData["stream"].match(/Step \d+\/\d+ :/)) {
 							try {
-								const tokenizedData: string[] = parsedData["stream"].split("/");
+								const tokenizedData: string[] = parsedData["stream"].split(path.sep);
 								currentStep = parseInt(tokenizedData[0].match(/\d+/)[0]);
 								//const totalSteps = parseInt(tokenizedData[1].match(/\d+/)[0]);
 
