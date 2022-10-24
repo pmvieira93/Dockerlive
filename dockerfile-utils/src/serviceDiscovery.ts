@@ -22,7 +22,7 @@ export function runServiceDiscovery(this: DynamicAnalysis) {
 						protocols.push("tcp"); //Ranged ports are always tcp
 					}
 				} else {
-					const splitPortProtocol = arg.getValue().split(path.sep);
+					const splitPortProtocol = arg.getValue().split("/");
 					rangesInFile.push(arg.getRange());
 					ports.push(parseInt(splitPortProtocol[0]));
 					protocols.push(splitPortProtocol[1] ? splitPortProtocol[1] : "tcp"); //Default protocol is tcp
@@ -53,7 +53,7 @@ export function runServiceDiscovery(this: DynamicAnalysis) {
 
 		const mappings = data.NetworkSettings.Ports;
 		for (let i = 0; i < rangesInFile.length; i++) {
-			let portMapping = mappings[ports[i] + path.sep + protocols[i]];
+			let portMapping = mappings[ports[i] + "/" + protocols[i]];
 			if(portMapping && portMapping[0] && portMapping[0].HostPort){
 				mappedPorts.push(parseInt(portMapping[0].HostPort));
 			}
@@ -133,7 +133,7 @@ export function runNmap(this: DynamicAnalysis, tcpMappedPorts, mappedPorts, rang
 					} else {
 						let msg = `Port ${ports[index]} (exposed on ${portID}) - ${protocol}`;
 						if (serviceName) {
-							msg += path.sep + serviceName;
+							msg += "/" + serviceName;
 						}
 						if (serviceProduct) {
 							msg += " - " + serviceProduct;

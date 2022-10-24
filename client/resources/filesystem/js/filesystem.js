@@ -200,8 +200,10 @@ function createEntry(filepath, filename, entry, depth, childrenCount){
 }
 
 function isSubpath(rootPath,edgePath){
-	rootPathSplit = rootPath.split(path.sep).filter((value,_index_arr) => value && value.length > 0);
-    edgePathSplit = edgePath.split(path.sep).filter((value,_index_arr) => value && value.length > 0);
+    console.log("RootPath: " +rootPath);
+    console.log("EdgePath: " +rootPath);
+	rootPathSplit = rootPath.split("/").filter((value,_index_arr) => value && value.length > 0);
+    edgePathSplit = edgePath.split("/").filter((value,_index_arr) => value && value.length > 0);
     
     for(let [index,rootSegment] of rootPathSplit.entries()){
     	if(edgePathSplit[index] == null || rootSegment != edgePathSplit[index]){
@@ -214,8 +216,10 @@ function isSubpath(rootPath,edgePath){
 
 function hideEntries(parentPath, registerOpenFolders = true){
     let currentElement;
+
+    console.log("ParentPath: " +parentPath);
     
-    if(isSubpath(parentPath,path.sep)){
+    if(isSubpath(parentPath,"/")){
         currentElement = document.getElementById("filetable").getElementsByTagName("tr")[1];
     }else{
         let parentElement = document.getElementById(parentPath);
@@ -266,7 +270,7 @@ function showEntries(parentPath, registerOpenFolders = true){
     	
     for(let [filename,entry] of Object.entries(parentNode)){
         let childrenCount = Object.entries(entry.children).length;
-    	addNode(createEntry(parentPath + path.sep + filename, filename, entry, depth, childrenCount));
+    	addNode(createEntry(parentPath + "/" + filename, filename, entry, depth, childrenCount));
     }
 
     let folderName = document.getElementById("name-"+parentPath);
@@ -286,9 +290,12 @@ function highlightChanges(){
 
     function recursiveCall(obj){
         for(let [filename, entry] of Object.entries(obj)){
-            let parentPath = path.sep + currentPath.join(path.sep);
+            
+            console.log(JSON.stringify(Object.entries(obj)));
+
+            let parentPath = "/" + currentPath.join("/");
             currentPath.push(filename);
-            let currentPathString = path.sep + currentPath.join(path.sep);
+            let currentPathString = "/" + currentPath.join("/");
     
             if(entry.type == "removal"){
                 let parentEntry = document.getElementById(parentPath);
@@ -318,7 +325,10 @@ function highlightChanges(){
 }
 
 function navigateToPath(path){
-	let splitPath = path.split(path.sep).filter((value,_index_arr) => value && value.length > 0);
+
+    console.log("Path: " +path);
+
+	let splitPath = path.split("/").filter((value,_index_arr) => value && value.length > 0);
     let currentNode = rootMerged;
     let depth = 0;
     

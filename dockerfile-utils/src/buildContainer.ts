@@ -7,18 +7,32 @@ import { DiagnosticSeverity ,Range } from 'vscode-languageserver-types';
 import { Duplex } from 'stream';
 
 export function buildContainer(this: DynamicAnalysis) {
+
+	/**
+	 * Windows is classifier with 'win32' (always)
+	 * 		File Path Separator = '\\'
+	 * MacOS is classifier with 'darwin'
+	 * 		File Path Separator = '/'
+	 * Follow: https://stackoverflow.com/questions/8683895/how-do-i-determine-the-current-operating-system-with-node-js
+	 */
+	let isWindows = process.platform === "win32";
+	let isMac = process.platform === "darwin";
+	
 	let dockerfilePath: string;
-	if (process.platform === "win32") {
+	if (isWindows) {
+		this.debugLog("File path separator '" + path.sep + "' for the OS '" +process.platform + "' ");
 		dockerfilePath = decodeURIComponent(uri2path(this.document.uri)).substr(1);
+		// Apply escape char to be sure that on windows doesn't have any problem
+		dockerfilePath = dockerfilePath.replace(path.sep,path.sep+path.sep);
 	} else {
+		this.debugLog("File path separator '" + path.sep + "' for the OS '" +process.platform + "' ");
 		dockerfilePath = decodeURIComponent(uri2path(this.document.uri));
 	}
+
 	const directory = path.dirname(dockerfilePath);
 	const tmpFileName = "tmp.Dockerfile"; //TODO - ADD TEMPORARY FILE TO VSCODE and GIT IGNORE (or simply move to a different directory)
 
 	const tardir = tar.pack(directory);
-	// MacOS & Unix/Linux = '/'
-	// Windows = '\\'
 	fs.writeFileSync(directory + path.sep + tmpFileName, this.document.getText());
 
 	this.docker.buildImage(tardir, { t: "testimage", dockerfile: tmpFileName, openStdin: true }, (error: string, stream: Duplex) => {
